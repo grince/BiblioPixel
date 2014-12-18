@@ -8,11 +8,15 @@ class LEDBase(object):
 
     def __init__(self, driver):
         """Base LED class. Use LEDStrip or LEDMatrix instead!"""
+        if not isinstance(driver, list):
+            driver = [driver]
+
         self.driver = driver
         try:
             self.numLEDs
         except AttributeError as e:
-            self.numLEDs = driver.numLEDs
+            for d in self.driver:
+                self.numLEDs += d.numLEDs
 
         self.bufByteCount = int(3 * self.numLEDs)
         self.lastIndex = self.numLEDs - 1
@@ -43,7 +47,10 @@ class LEDBase(object):
 
     def update(self):
         """Push the current pixel state to the driver"""
-        self.driver.update(self.buffer)
+        pos = 0
+        for d in self.driver:
+            d.update(self.buffer[pos:d.numLEDs+pos])
+            pos += d.numLEDs
     
     #use with caution!
     def setBuffer(self, buf):
@@ -63,12 +70,19 @@ class LEDBase(object):
         """
         if(bright > 255 or bright < 0):
             raise ValueError('Brightness must be between 0 and 255')
-        if(self.driver.setMasterBrightness(bright)):
-            self.masterBrightness = 255
-            return True
-        else:
+        result = True
+        for d in self.driver:
+            if(not self.driver.setMasterBrightness(bright)):
+                result = False
+                break
+
+        #all or nothing, set them all back if False
+        if not result:
+            for d in self.driver:
+                self.setMasterBrightness(255)
             self.masterBrightness = bright
-            return False
+        else:
+            self.masterBrightness = 255
     
     #Set single pixel to RGB value
     def setRGB(self, pixel, r, g, b):
