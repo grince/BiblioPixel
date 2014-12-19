@@ -15,6 +15,7 @@ class LEDBase(object):
         try:
             self.numLEDs
         except AttributeError as e:
+            self.numLEDs = 0
             for d in self.driver:
                 self.numLEDs += d.numLEDs
 
@@ -161,7 +162,9 @@ def mapGen(width, height, serpentine):
         
 class LEDMatrix(LEDBase):
 
-    def __init__(self, driver, width = 0, height = 0, coordMap = None, rotation = MatrixRotation.ROTATE_0, vert_flip = False, serpentine = True):
+    def __init__(self, driver, width = 0, height = 0, coordMap = None, 
+                       rotation = MatrixRotation.ROTATE_0, vert_flip = False, 
+                       serpentine = True, multi_layout = [0]):
         """Main class for matricies.
 
         driver - instance that inherits from DriverBase
@@ -174,8 +177,15 @@ class LEDMatrix(LEDBase):
         super(LEDMatrix, self).__init__(driver)
 
         if width == 0 and height == 0:
-            width = self.driver.width
-            height = self.driver.height
+            colWidth = []
+            for row in multi_layout:
+                if not isinstance(row, list): row = [row]
+                height += self.driver[row[0]].height
+                for col in row:
+                    if col < len(self.driver):
+                        width += self.driver[col].width
+                    else:
+                        raise ValueError("multi_layout total count must match driver count!")
 
         self.width = width
         self.height = height
@@ -194,6 +204,9 @@ class LEDMatrix(LEDBase):
         if coordMap:
             self.matrix_map = coordMap
         else:
+            for row in multi_layout:
+                if not isinstance(row, list): row = [row]
+
             self.matrix_map = mapGen(self.width, self.height, serpentine)
 
         self.driver.matrix_map = self.matrix_map
