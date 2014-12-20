@@ -76,7 +76,12 @@ class DriverSPIBase(DriverBase):
 
     def _sendData(self):
         if self.use_py_spi:
-            self.spi.xfer2(self._buf)
+            toSend = self.bufByteCount
+            sent = 0
+            while toSend > 0:
+                self.spi.xfer2(self._buf[sent:min(toSend, 4096)+sent])
+                sent += min(toSend, 4096)
+                toSend -= sent
         else:
             self.spi.write(self._buf)
             self.spi.flush()
