@@ -582,7 +582,7 @@ class LEDMatrix(LEDBase):
                 if i == 9:
                     line = 0
                 else:
-                    line = font.GLCDBIBFONT[c][i]
+                    line = bibfont.GLCDBIBFONT[c][i]
                 for j in range(8):
                     yPos = y+(j*size)
                     if ((yPos < self.height) and

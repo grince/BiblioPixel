@@ -1,7 +1,7 @@
-from bibliopixel.led import *
+from bibliopixel.bibled import *
 from bibliopixel.rinceanim import LightningBibText
-from bibliopixel.animation import StripChannelTest
-from bibliopixel.drivers.LPD8806 import *
+#from bibliopixel.animation import StripChannelTest
+#from bibliopixel.drivers.LPD8806 import *
 from bibliopixel.drivers.visualizer import DriverVisualizer
 
 #create driver for a 12x12 grid, use the size of your display
